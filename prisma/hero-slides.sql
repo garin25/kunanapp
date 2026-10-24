@@ -1,0 +1,14 @@
+CREATE TABLE IF NOT EXISTS hero_slides (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(120) NOT NULL,
+  description VARCHAR(500) NOT NULL,
+  image_url VARCHAR(1000) NOT NULL,
+  image_public_id VARCHAR(255) NOT NULL,
+  tone VARCHAR(200) NOT NULL,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMPTZ(3) NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS hero_slides_sort_order_id_idx
+  ON hero_slides (sort_order, id);

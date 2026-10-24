@@ -1,0 +1,1 @@
+export const ORDER_RESERVATION_HOURS = 24;

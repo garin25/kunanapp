@@ -1,0 +1,119 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum EstadoPedido {
+  PENDIENTE
+  CONFIRMADO
+  DESCARTADO
+  EXPIRADO
+}
+
+model Categoria {
+  id        Int        @id @default(autoincrement())
+  nombre    String     @unique @db.VarChar(100)
+  productos Producto[]
+
+  @@map("categorias")
+}
+
+model Marca {
+  id        Int        @id @default(autoincrement())
+  nombre    String     @unique @db.VarChar(100)
+  productos Producto[]
+
+  @@map("marcas")
+}
+
+model Producto {
+  id                  Int                @id @default(autoincrement())
+  nombre              String             @db.VarChar(255)
+  descripcion         String?
+  precioBase          Decimal            @map("precio_base") @db.Decimal(10, 2)
+  imagenPrincipalUrl  String?            @map("imagen_principal_url") @db.VarChar(500)
+  stockGeneral        Int?               @map("stock_general")
+  destacadoTipo       String?            @map("destacado_tipo") @db.VarChar(50)
+  mostrarEnLanding    Boolean            @default(true) @map("mostrar_en_landing")
+  destacadoColor      String?            @map("destacado_color") @db.VarChar(7)
+  categoriaId         Int?               @map("categoria_id")
+  marcaId             Int?               @map("marca_id")
+  categoria           Categoria?         @relation(fields: [categoriaId], references: [id], onDelete: SetNull)
+  marca               Marca?             @relation(fields: [marcaId], references: [id], onDelete: SetNull)
+  imagenesSecundarias ImagenSecundaria[]
+  variantes           Variante[]
+
+  @@map("productos")
+}
+
+model ImagenSecundaria {
+  id         Int      @id @default(autoincrement())
+  productoId Int      @map("producto_id")
+  imagenUrl  String   @map("imagen_url") @db.VarChar(500)
+  producto   Producto @relation(fields: [productoId], references: [id], onDelete: Cascade)
+
+  @@map("imagenes_secundarias")
+}
+
+model Variante {
+  id                Int      @id @default(autoincrement())
+  productoId        Int      @map("producto_id")
+  nombreAtributo    String   @map("nombre_atributo") @db.VarChar(100)
+  valorAtributo     String   @map("valor_atributo") @db.VarChar(100)
+  stock             Int      @default(0)
+  precioModificador Decimal? @map("precio_modificador") @db.Decimal(10, 2)
+  imagenUrl         String?  @map("imagen_url") @db.VarChar(500)
+  producto          Producto @relation(fields: [productoId], references: [id], onDelete: Cascade)
+
+  @@map("variantes")
+}
+
+model Pedido {
+  id             Int          @id @default(autoincrement())
+  estado         EstadoPedido @default(PENDIENTE)
+  total          Decimal      @db.Decimal(10, 2)
+  metodoEntrega  String       @map("metodo_entrega") @db.VarChar(100)
+  detalleEntrega String       @map("detalle_entrega") @db.VarChar(1000)
+  expiraEn       DateTime     @map("expira_en")
+  creadoEn       DateTime     @default(now()) @map("creado_en")
+  actualizadoEn  DateTime     @updatedAt @map("actualizado_en")
+  items          ItemPedido[]
+
+  @@index([estado, expiraEn])
+  @@map("pedidos")
+}
+
+model ItemPedido {
+  id             Int     @id @default(autoincrement())
+  pedidoId       Int     @map("pedido_id")
+  productoId     Int     @map("producto_id")
+  varianteId     Int?    @map("variante_id")
+  nombreProducto String  @map("nombre_producto") @db.VarChar(255)
+  nombreVariante String? @map("nombre_variante") @db.VarChar(200)
+  precioUnitario Decimal @map("precio_unitario") @db.Decimal(10, 2)
+  cantidad       Int
+  pedido         Pedido  @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+
+  @@index([productoId])
+  @@index([varianteId])
+  @@map("items_pedido")
+}
+
+model HeroSlide {
+  id            Int      @id @default(autoincrement())
+  title         String   @db.VarChar(120)
+  description   String   @db.VarChar(500)
+  imageUrl      String   @map("image_url") @db.VarChar(1000)
+  imagePublicId String   @map("image_public_id") @db.VarChar(255)
+  tone          String   @db.VarChar(200)
+  sortOrder     Int      @default(0) @map("sort_order")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([sortOrder, id])
+  @@map("hero_slides")
+}
