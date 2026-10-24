@@ -50,6 +50,8 @@ type StorefrontProps = {
 const cartStorageKey = 'kunan-cart-v1';
 const maxCartLineItems = 50;
 const maxCartItemQuantity = 100;
+const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER ?? '';
+const isWhatsAppConfigured = /^\d{10,15}$/.test(whatsappNumber);
 
 function restoreCartItems(
   storedValue: string,
@@ -582,6 +584,13 @@ export function Storefront({
   const sendOrderToWhatsApp = () => {
     setReservationMessage('');
     setReservationAvailability(null);
+    if (!isWhatsAppConfigured) {
+      setReservationMessage(
+        'WhatsApp no está configurado correctamente. Contactanos para completar tu pedido.'
+      );
+      return;
+    }
+
     const whatsappWindow = window.open('about:blank', '_blank');
     if (!whatsappWindow) {
       setReservationMessage(
@@ -636,7 +645,7 @@ export function Storefront({
           `Total estimado: ${money(reservation.total)}`,
           `Entrega: ${deliveryDetails}`,
         ].join('\n');
-        whatsappWindow.location.href = `https://wa.me/?text=${encodeURIComponent(message)}`;
+        whatsappWindow.location.href = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
         setReservationMessage(
           'Se reservó temporalmente tu pedido y se intentó abrir WhatsApp. Revisá que se haya abierto y enviá el mensaje para confirmar la compra. Si no recibimos el mensaje, la reserva vence y el stock se libera.'
         );
@@ -1362,22 +1371,24 @@ export function Storefront({
                 />
               </svg>
             </a>
-            <a
-              href="https://wa.me/5491100000000"
-              target="_blank"
-              rel="noreferrer"
-              aria-label="WhatsApp de Kunan"
-            >
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 24 24"
-                className="size-[19px] fill-none stroke-current"
-                strokeWidth="1.5"
+            {isWhatsAppConfigured && (
+              <a
+                href={`https://wa.me/${whatsappNumber}`}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="WhatsApp de Kunan"
               >
-                <path d="M20 11.5a8 8 0 0 1-11.9 7L4 20l1.5-4.1A8 8 0 1 1 20 11.5Z" />
-                <path d="M9.2 8.7c.2-.4.4-.4.7-.4h.5c.2 0 .4.1.5.4l.7 1.5c.1.2.1.4-.1.6l-.5.6c.7 1.2 1.5 1.9 2.7 2.4l.6-.5c.2-.2.4-.2.6-.1l1.4.7c.2.1.3.3.2.5-.2.8-.8 1.2-1.5 1.2-2.5-.2-5.8-3.1-6.3-5.7-.1-.5.1-.9.5-1.2Z" />
-              </svg>
-            </a>
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  className="size-[19px] fill-none stroke-current"
+                  strokeWidth="1.5"
+                >
+                  <path d="M20 11.5a8 8 0 0 1-11.9 7L4 20l1.5-4.1A8 8 0 1 1 20 11.5Z" />
+                  <path d="M9.2 8.7c.2-.4.4-.4.7-.4h.5c.2 0 .4.1.5.4l.7 1.5c.1.2.1.4-.1.6l-.5.6c.7 1.2 1.5 1.9 2.7 2.4l.6-.5c.2-.2.4-.2.6-.1l1.4.7c.2.1.3.3.2.5-.2.8-.8 1.2-1.5 1.2-2.5-.2-5.8-3.1-6.3-5.7-.1-.5.1-.9.5-1.2Z" />
+                </svg>
+              </a>
+            )}
           </div>
         </div>
         <p className="mx-auto mt-10 max-w-[1320px] border-t border-[#ded3c6] pt-5 text-[10px] text-[#9b9288]">

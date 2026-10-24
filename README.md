@@ -52,6 +52,8 @@ admin panel.
 
 The customer checkout creates a pending order and reserves its stock before opening WhatsApp. The admin panel's **Pedidos** section lists these reservations. Confirm an order only after receiving the customer's WhatsApp message; confirmation keeps the reserved stock deducted. Discarding an order releases its stock. Unconfirmed reservations expire after 12 hours.
 
+Set `NEXT_PUBLIC_WHATSAPP_NUMBER` in the project-root `.env` file and in the production hosting environment. Use the international number with digits only (no `+`, spaces, or hyphens), for example `5491163524877`. This public variable sets the destination for both checkout orders and the WhatsApp link in the footer; restart the development server after changing it.
+
 Change `ORDER_RESERVATION_HOURS` in `lib/order-config.ts` to adjust the reservation duration. On Vercel, `vercel.json` schedules expiration checks every five minutes. Set a strong `CRON_SECRET` environment variable in the deployment so the scheduled endpoint can authenticate. Expired reservations are also released when a new reservation is made or the admin opens the orders panel.
 
 After pulling this schema change, run `npm run db:push` against the configured PostgreSQL database before deploying the updated app.
